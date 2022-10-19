@@ -40,11 +40,10 @@ public class ProductDatabase implements ProductRepository {
         }
     }
 
-    @Override
-    public List<Product> findAll() {
+    private List<Product> executeAndCollectResult(String sql) {
         try (Connection c = DriverManager.getConnection(url)) {
             Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT");
+            ResultSet rs = stmt.executeQuery(sql);
 
             List<Product> products = new ArrayList<>();
 
@@ -62,42 +61,31 @@ public class ProductDatabase implements ProductRepository {
     }
 
     @Override
+    public List<Product> findAll() {
+        return executeAndCollectResult("SELECT * FROM PRODUCT");
+    }
+
+    @Override
     public Product findByMaxPrice() {
-        try (Connection c = DriverManager.getConnection(url)) {
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1");
-
-            List<Product> products = new ArrayList<>();
-
-            while (rs.next()) {
-                products.add(new Product(rs.getString("name"), rs.getInt("price")));
-            }
-
-            rs.close();
-            stmt.close();
-
-            return products.get(0);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return executeAndCollectResult("SELECT * FROM PRODUCT ORDER BY PRICE DESC LIMIT 1").get(0);
     }
 
     @Override
     public Product findByMinPrice() {
+        return executeAndCollectResult("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1").get(0);
+    }
+
+    private int executeAndGetInt(String sql) {
         try (Connection c = DriverManager.getConnection(url)) {
             Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT ORDER BY PRICE LIMIT 1");
+            ResultSet rs = stmt.executeQuery(sql);
 
-            List<Product> products = new ArrayList<>();
-
-            while (rs.next()) {
-                products.add(new Product(rs.getString("name"), rs.getInt("price")));
-            }
+            int res = rs.getInt(1);
 
             rs.close();
             stmt.close();
 
-            return products.get(0);
+            return res;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -105,35 +93,11 @@ public class ProductDatabase implements ProductRepository {
 
     @Override
     public int totalPrice() {
-        try (Connection c = DriverManager.getConnection(url)) {
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT SUM(price) FROM PRODUCT");
-
-            int res = rs.getInt(1);
-
-            rs.close();
-            stmt.close();
-
-            return res;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return executeAndGetInt("SELECT SUM(price) FROM PRODUCT");
     }
 
     @Override
     public int count() {
-        try (Connection c = DriverManager.getConnection(url)) {
-            Statement stmt = c.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM PRODUCT");
-
-            int res = rs.getInt(1);
-
-            rs.close();
-            stmt.close();
-
-            return res;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        return executeAndGetInt("SELECT COUNT(*) FROM PRODUCT");
     }
 }
