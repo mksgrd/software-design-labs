@@ -24,27 +24,17 @@ public class QueryServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String command = request.getParameter("command");
 
-        if ("max".equals(command)) {
-            response.getWriter().println(new ProductsHtmlDTO(
-                    "<h1>Product with max price: </h1>", List.of(repository.findByMaxPrice())
-            ));
-        } else if ("min".equals(command)) {
-            response.getWriter().println(new ProductsHtmlDTO(
-                    "<h1>Product with min price: </h1>", List.of(repository.findByMinPrice())
-            ));
+        ProductsHtmlDTO dto = switch (command) {
+            case "max" ->
+                    new ProductsHtmlDTO("<h1>Product with max price: </h1>", List.of(repository.findByMaxPrice()));
+            case "min" ->
+                    new ProductsHtmlDTO("<h1>Product with min price: </h1>", List.of(repository.findByMinPrice()));
+            case "sum" -> new ProductsHtmlDTO("Summary price: \n" + repository.totalPrice());
+            case "count" -> new ProductsHtmlDTO("Number of products: \n" + repository.count());
+            default -> new ProductsHtmlDTO("Unknown command: " + command);
+        };
 
-        } else if ("sum".equals(command)) {
-            response.getWriter().println(new ProductsHtmlDTO(
-                    "Summary price: \n" + repository.totalPrice()
-            ));
-
-        } else if ("count".equals(command)) {
-            response.getWriter().println(new ProductsHtmlDTO(
-                    "Number of products: \n" + repository.count()
-            ));
-        } else {
-            response.getWriter().println("Unknown command: " + command);
-        }
+        response.getWriter().println(dto);
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
