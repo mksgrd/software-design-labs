@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <title>Task manager</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+</head>
+<body>
+
+<h1>
+    Task manager
+</h1>
+
+<ul th:each="taskListDTO : ${taskLists}">
+    <li>
+        <p th:text="|${taskListDTO.getName()} (ID = ${taskListDTO.getId()})|"></p>
+        <ul th:each="taskDTO : ${taskListDTO.getTasks()}">
+            <li th:text="|(ID = ${taskDTO.getId()}, completed = ${taskDTO.isCompleted()}) ${taskDTO.getName()}|">
+            </li>
+        </ul>
+    </li>
+</ul>
+
+<h2>
+    Create new list
+</h2>
+
+<form th:object="${addTaskListDTO}" method="post" action="/add-list">
+    <label>
+        List name
+        <input type="text" th:field="*{name}"/>
+    </label>
+
+    <input type="submit" value="Add">
+</form>
+
+<h2>
+    Delete list
+</h2>
+
+<form th:object="${removeTaskListDTO}" method="post" action="/remove-list">
+    <label>
+        List id
+        <input type="text" th:field="*{id}"/>
+    </label>
+
+    <input type="submit" value="Delete">
+</form>
+
+<h2>
+    Add task to list
+</h2>
+
+<form th:object="${addTaskDTO}" method="post" action="/add-task">
+    <label>
+        Task name
+        <input type="text" th:field="*{name}"/>
+    </label>
+
+    <label>
+        List id
+        <input type="text" th:field="*{listId}"/>
+    </label>
+
+    <input type="submit" value="Add">
+</form>
+
+<h2>
+    Complete task
+</h2>
+
+<form th:object="${completeTaskDTO}" method="post" action="/complete-task">
+
+    <label>
+        Task id
+        <input type="text" th:field="*{id}"/>
+    </label>
+
+    <input type="submit" value="Complete">
+</form>
+
+</body>
+</html>
